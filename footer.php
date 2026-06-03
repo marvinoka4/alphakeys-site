@@ -14,7 +14,7 @@
                     <img src="<?php echo esc_url(get_stylesheet_directory_uri()); ?>/assets/images/util/site_logo_white_.svg" width="300" height="100" alt="Footer Logo">
                 </a>
             </div>
-            <div class="small-12 medium-10 large-10 cell text-center">
+            <div class="small-12 medium-10 large-10 cell text-center" style="padding-left: 10px; padding-right: 10px;">
                 <p class="text-small">Alphakey Mortgages is a trading style of ITM Capital Limited, a company registered in
                     England and Wales. No. 15075995. Registered Office: 20 Wenlock Road, London, England,
                     N1 7GU</p>
