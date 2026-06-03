@@ -190,7 +190,7 @@
                                         </div>
                                         <div>
                                             <label for="phone">Phone</label>
-                                            <input type="tel" id="phone" name="phone" placeholder="+44xxxxx" required pattern="^\+?[1-9]\d{1,14}$">
+                                            <input type="tel" id="phone" name="phone" placeholder="07123456789" required pattern="^0[1-9]\d{9,10}$">
                                             <span class="form-error">Please enter a valid phone number.</span>
                                         </div>
                                         <div>
