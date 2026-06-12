@@ -29,8 +29,8 @@
                 <nav aria-label="Footer navigation">
                     <ul class="menu align-center">
                         <li><a href="/privacy-policy" class="click-track" id="privacy-policy" style="color: white">Privacy Policy </a></li>
-                        <li><a href="/cookie-policy" class="click-track" id="cookie-policy" style="color: white">Cookie Policy </a></li>
-                        <li><a href="/complaints-procedure" class="click-track" id="compliants-procedure" style="color: white">Complaints Procedure </a></li>
+                        <li><a href="/cookie-policy" class="click-track" id="cookie-policy" style="color: white">Cookie Policy</a></li>
+                        <li><a href="/complaints-procedure" class="click-track" id="compliants-procedure" style="color: white">Complaints Procedure</a></li>
                     </ul>
                 </nav>
             </div>
