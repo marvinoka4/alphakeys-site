@@ -6,6 +6,7 @@
  * @package helium-fdn
  */
 ?>
+
 <section class="grid-container margin-top-2" aria-labelledby="protection-form-title">
   <div class="grid-x grid-margin-x align-center-middle">
     <div class="large-10 cell">
