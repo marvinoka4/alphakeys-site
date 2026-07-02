@@ -1,12 +1,11 @@
 <?php
 
 /**
- * Mortgages Form Section
+ * Mortgages Form Section (Gravity Forms submission)
  *
  * @package helium-fdn
  */
 ?>
-
 <section class="grid-container margin-top-2" aria-labelledby="mortgage-form-title">
     <div class="grid-x grid-margin-x align-center-middle">
         <div class="large-10 cell">
@@ -18,7 +17,7 @@
                         <button id="remortgage-btn" class="button">Remortgage</button>
                         <button id="specialist-lending-btn" class="button">Specialist Lending</button>
                     </div>
-                    <div class="form-box" id="form-box">
+                    <div class="form-box" id="gf-mortgages-box">
                         <div class="grid-x align-center-middle">
                             <div class="cell medium-5 small-12 form-progress">
                                 <div class="progress-form margin-vertical-1">
@@ -309,15 +308,16 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const nextButton = document.querySelector('.btn-next');
-        const prevButton = document.querySelector('.btn-prev');
-        const submitButton = document.querySelector('#submitButton');
-        const steps = document.querySelectorAll('.step');
-        const formSteps = document.querySelectorAll('.form-step');
-        const form = document.querySelector('#mortgageForm');
-        const formProgress = document.querySelector('.form-progress');
-        const formContent = document.querySelector('.form-content');
-        const submissionSuccess = document.querySelector('.submission-success');
+        const root = document.querySelector('#gf-mortgages-box');
+        const nextButton = root.querySelector('.btn-next');
+        const prevButton = root.querySelector('.btn-prev');
+        const submitButton = root.querySelector('#submitButton');
+        const steps = root.querySelectorAll('.step');
+        const formSteps = root.querySelectorAll('.form-step');
+        const form = root.querySelector('#mortgageForm');
+        const formProgress = root.querySelector('.form-progress');
+        const formContent = root.querySelector('.form-content');
+        const submissionSuccess = root.querySelector('.submission-success');
         let active = 1;
         const formData = {};
 
@@ -458,24 +458,24 @@
             if (reasonSelect.checkValidity() && reasonSelect.value !== '') {
                 reasonSelect.classList.remove('is-invalid');
             }
-            toggleAdditionalFields(); // Call here to sync with radio changes
+            toggleAdditionalFields();
         };
 
         // Button click handlers
-        document.getElementById('specialist-lending-btn').onclick = function() {
-            document.querySelector('input[name="mortgageOption"][value="specialist-lending"]').checked = true;
-            updateReasonOptions('specialist-lending');
-        };
-
-        document.getElementById('purchase-btn').onclick = function() {
-            document.querySelector('input[name="mortgageOption"][value="purchase"]').checked = true;
+        root.querySelector('#purchase-btn') && (root.querySelector('#purchase-btn').onclick = function() {
+            form.querySelector('input[name="mortgageOption"][value="purchase"]').checked = true;
             updateReasonOptions('purchase');
-        };
+        });
 
-        document.getElementById('remortgage-btn').onclick = function() {
-            document.querySelector('input[name="mortgageOption"][value="remortgage"]').checked = true;
+        root.querySelector('#remortgage-btn') && (root.querySelector('#remortgage-btn').onclick = function() {
+            form.querySelector('input[name="mortgageOption"][value="remortgage"]').checked = true;
             updateReasonOptions('remortgage');
-        };
+        });
+
+        root.querySelector('#specialist-lending-btn') && (root.querySelector('#specialist-lending-btn').onclick = function() {
+            form.querySelector('input[name="mortgageOption"][value="specialist-lending"]').checked = true;
+            updateReasonOptions('specialist-lending');
+        });
 
         // Function to collect form data
         const collectFormData = () => {
@@ -490,6 +490,7 @@
             formData.additionalInfo = form.querySelector('#additionalInfo').value || '';
             formData.firstName = form.querySelector('#firstName').value || '';
             formData.lastName = form.querySelector('#lastName').value || '';
+            formData.phone = form.querySelector('#phone').value || '';
             formData.email = form.querySelector('#email').value || 'Not provided';
             formData.employmentStatus = form.querySelector('#employmentStatus').value || 'Not selected';
             formData.grossAnnualIncome = form.querySelector('#grossAnnualIncome').value || '0';
@@ -498,22 +499,22 @@
         // Function to populate summary table
         const populateSummary = () => {
             if (active === 4) {
-                document.querySelector('#summaryMortgageType').textContent = formData.mortgageType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-                document.querySelector('#summaryReason').textContent = formData.reason.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Not selected';
-                document.querySelector('#summaryPropertyPrice').textContent = `£${parseFloat(formData.propertyPrice).toLocaleString()}`;
-                document.querySelector('#summaryLoanAmount').textContent = `£${parseFloat(formData.loanAmount).toLocaleString()}`;
-                document.querySelector('#summaryMortgageTerm').textContent = `${formData.mortgageTerm} years`;
-                document.querySelector('#summaryCurrentMortgageOutstanding').textContent =
+                form.querySelector('#summaryMortgageType').textContent = formData.mortgageType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                form.querySelector('#summaryReason').textContent = formData.reason.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Not selected';
+                form.querySelector('#summaryPropertyPrice').textContent = `£${parseFloat(formData.propertyPrice).toLocaleString()}`;
+                form.querySelector('#summaryLoanAmount').textContent = `£${parseFloat(formData.loanAmount).toLocaleString()}`;
+                form.querySelector('#summaryMortgageTerm').textContent = `${formData.mortgageTerm} years`;
+                form.querySelector('#summaryCurrentMortgageOutstanding').textContent =
                     (formData.mortgageType === 'remortgage' || formData.mortgageType === 'specialist-lending') ?
                     `£${parseFloat(formData.currentMortgageOutstanding).toLocaleString()}` : 'N/A';
-                document.querySelector('#summaryAdditionalLoanAmount').textContent =
+                form.querySelector('#summaryAdditionalLoanAmount').textContent =
                     (formData.mortgageType === 'remortgage' || formData.mortgageType === 'specialist-lending') ?
                     `£${parseFloat(formData.additionalLoanAmount).toLocaleString()}` : 'N/A';
-                document.querySelector('#summaryAdditionalInfo').textContent = formData.additionalInfo || '-';
-                document.querySelector('#summaryApplicantName').textContent = `${formData.firstName} ${formData.lastName}`.trim() || 'Not provided';
-                document.querySelector('#summaryEmail').textContent = formData.email;
-                document.querySelector('#summaryEmploymentStatus').textContent = formData.employmentStatus.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-                document.querySelector('#summaryGrossAnnualIncome').textContent = `£${parseFloat(formData.grossAnnualIncome).toLocaleString()}`;
+                form.querySelector('#summaryAdditionalInfo').textContent = formData.additionalInfo || '-';
+                form.querySelector('#summaryApplicantName').textContent = `${formData.firstName} ${formData.lastName}`.trim() || 'Not provided';
+                form.querySelector('#summaryEmail').textContent = formData.email;
+                form.querySelector('#summaryEmploymentStatus').textContent = formData.employmentStatus.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                form.querySelector('#summaryGrossAnnualIncome').textContent = `£${parseFloat(formData.grossAnnualIncome).toLocaleString()}`;
             }
         };
 
@@ -598,7 +599,7 @@
 
             if (allValid) {
                 collectFormData();
-                submitToFormidable();
+                submitToGravityForms();
             }
         });
 
@@ -643,16 +644,15 @@
         updateReasonOptions();
         updateProgress();
 
-        // Submit to Formidable via AJAX
-        const submitToFormidable = async () => {
+        // Submit to Gravity Forms via AJAX
+        const submitToGravityForms = async () => {
             const ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
-            const nonce = '<?php echo wp_create_nonce('submit_to_formidable_nonce'); ?>';
+            const nonce = '<?php echo wp_create_nonce('submit_mortgage_gf_nonce'); ?>';
             const jsonString = JSON.stringify(formData);
             const payload = new URLSearchParams({
-                action: 'submit_to_formidable',
+                action: 'submit_mortgage_to_gravity_forms',
                 nonce: nonce,
                 formData: jsonString,
-                form_id: '2' // Replace with your Formidable form ID
             });
 
             try {
@@ -666,7 +666,6 @@
 
                 if (response.ok) {
                     const result = await response.json();
-                    // Push to GTM dataLayer
                     window.dataLayer = window.dataLayer || [];
                     window.dataLayer.push({
                         'event': 'generate_lead',

@@ -1,18 +1,17 @@
 <?php
 
 /**
- * Protections Form Section
+ * Protections Form Section (Gravity Forms submission)
  *
  * @package helium-fdn
  */
 ?>
-
 <section class="grid-container margin-top-2" aria-labelledby="protection-form-title">
   <div class="grid-x grid-margin-x align-center-middle">
     <div class="large-10 cell">
       <div id="page" class="site">
         <div class="container">
-          <div class="form-box" id="form-box">
+          <div class="form-box" id="gf-protections-box">
             <div class="grid-x align-center-middle">
               <div class="cell medium-5 small-12 form-progress">
                 <div class="progress-form margin-vertical-1">
@@ -288,58 +287,33 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const nextButton = document.querySelector('.btn-next');
-    const prevButton = document.querySelector('.btn-prev');
-    const submitButton = document.querySelector('#submitButton');
-    const steps = document.querySelectorAll('.step');
-    const formSteps = document.querySelectorAll('.form-step');
-    const form = document.querySelector('#protectionForm');
-    const formProgress = document.querySelector('.form-progress');
-    const formContent = document.querySelector('.form-content');
-    const submissionSuccess = document.querySelector('.submission-success');
+    const root = document.querySelector('#gf-protections-box');
+    const nextButton = root.querySelector('.btn-next');
+    const prevButton = root.querySelector('.btn-prev');
+    const submitButton = root.querySelector('#submitButton');
+    const steps = root.querySelectorAll('.step');
+    const formSteps = root.querySelectorAll('.form-step');
+    const form = root.querySelector('#protectionForm');
+    const formProgress = root.querySelector('.form-progress');
+    const formContent = root.querySelector('.form-content');
+    const submissionSuccess = root.querySelector('.submission-success');
     let active = 1;
     let formData = {};
 
     // Initialize Foundation Abide (assumes jQuery and Foundation are loaded)
     const abide = new Foundation.Abide(jQuery(form));
 
-    // Button click handlers
-    document.getElementById('life-insurance-btn').onclick = function() {
-      document.querySelector('input[name="protectionOption"][value="life-insurance"]').checked = true;
-    };
-
-    document.getElementById('critical-illness-cover-btn').onclick = function() {
-      document.querySelector('input[name="protectionOption"][value="critical-illness-cover"]').checked = true;
-    };
-
-    document.getElementById('life-critical-illness-cover-btn').onclick = function() {
-      document.querySelector('input[name="protectionOption"][value="life-critical-illness-cover"]').checked = true;
-    };
-
-    document.getElementById('mortgage-protection-btn').onclick = function() {
-      document.querySelector('input[name="protectionOption"][value="mortgage-protection"]').checked = true;
-    };
-
-    document.getElementById('income-protection-btn').onclick = function() {
-      document.querySelector('input[name="protectionOption"][value="income-protection"]').checked = true;
-    };
-
-    document.getElementById('whole-of-life-btn').onclick = function() {
-      document.querySelector('input[name="protectionOption"][value="whole-of-life"]').checked = true;
-    };
-
     // Elements for dynamic updates
-    const coverAmountLabel = document.querySelector('.cover-amount-label');
-    const coverTermRow = document.querySelector('.cover-term-row');
-    const coverTermInput = document.querySelector('#coverTerm');
-    const summaryAmountLabel = document.querySelector('.summary-amount-label');
-    const summaryCoverTermRow = document.querySelector('.summary-cover-term-row');
+    const coverAmountLabel = root.querySelector('.cover-amount-label');
+    const coverTermRow = root.querySelector('.cover-term-row');
+    const coverTermInput = root.querySelector('#coverTerm');
+    const summaryAmountLabel = root.querySelector('.summary-amount-label');
+    const summaryCoverTermRow = root.querySelector('.summary-cover-term-row');
 
     // Function to update form fields based on protection option
     const updateFormFields = () => {
       const selectedOption = form.querySelector('input[name="protectionOption"]:checked')?.value;
 
-      // Update Cover Amount label
       if (selectedOption === 'income-protection') {
         coverAmountLabel.textContent = 'Benefit Amount';
         summaryAmountLabel.textContent = 'Benefit Amount';
@@ -348,7 +322,6 @@
         summaryAmountLabel.textContent = 'Cover Amount';
       }
 
-      // Update Term of Cover visibility and state
       if (selectedOption === 'whole-of-life') {
         coverTermRow.style.display = 'none';
         coverTermInput.disabled = true;
@@ -389,17 +362,17 @@
     // Populate summary table
     const populateSummary = () => {
       if (active === 4) {
-        document.querySelector('#summaryProtectionType').textContent = formData.protectionOption ? formData.protectionOption.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Not selected';
-        document.querySelector('#summaryCoverAmount').textContent = formData.coverAmount ? `£${parseFloat(formData.coverAmount).toLocaleString()}` : '£0';
-        document.querySelector('#summaryCoverTerm').textContent = formData.coverTerm ? `${formData.coverTerm} years` : '0 years';
-        document.querySelector('#summaryApplicantName').textContent = `${formData.firstName} ${formData.lastName}`.trim() || 'Not provided';
-        document.querySelector('#summaryPhone').textContent = formData.phone || 'Not provided';
-        document.querySelector('#summaryEmail').textContent = formData.email || 'Not provided';
-        document.querySelector('#summaryDob').textContent = formData.dob === '//' ? 'Not provided' : formData.dob;
-        document.querySelector('#summarySmokerStatus').textContent = formData.smokerStatus ? formData.smokerStatus.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Not selected';
-        document.querySelector('#summaryEmploymentStatus').textContent = formData.employmentStatus ? formData.employmentStatus.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Not selected';
-        document.querySelector('#summaryGrossAnnualIncome').textContent = formData.grossAnnualIncome ? `£${parseFloat(formData.grossAnnualIncome).toLocaleString()}` : '£0';
-        document.querySelector('#summaryAdditionalInfo').textContent = formData.additionalInfo || '-';
+        form.querySelector('#summaryProtectionType').textContent = formData.protectionOption ? formData.protectionOption.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Not selected';
+        form.querySelector('#summaryCoverAmount').textContent = formData.coverAmount ? `£${parseFloat(formData.coverAmount).toLocaleString()}` : '£0';
+        form.querySelector('#summaryCoverTerm').textContent = formData.coverTerm ? `${formData.coverTerm} years` : '0 years';
+        form.querySelector('#summaryApplicantName').textContent = `${formData.firstName} ${formData.lastName}`.trim() || 'Not provided';
+        form.querySelector('#summaryPhone').textContent = formData.phone || 'Not provided';
+        form.querySelector('#summaryEmail').textContent = formData.email || 'Not provided';
+        form.querySelector('#summaryDob').textContent = formData.dob === '//' ? 'Not provided' : formData.dob;
+        form.querySelector('#summarySmokerStatus').textContent = formData.smokerStatus ? formData.smokerStatus.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Not selected';
+        form.querySelector('#summaryEmploymentStatus').textContent = formData.employmentStatus ? formData.employmentStatus.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Not selected';
+        form.querySelector('#summaryGrossAnnualIncome').textContent = formData.grossAnnualIncome ? `£${parseFloat(formData.grossAnnualIncome).toLocaleString()}` : '£0';
+        form.querySelector('#summaryAdditionalInfo').textContent = formData.additionalInfo || '-';
       }
     };
 
@@ -447,7 +420,7 @@
 
       collectFormData();
       populateSummary();
-      updateFormFields(); // Ensure labels and fields are correct
+      updateFormFields();
     };
 
     // Next button click
@@ -483,7 +456,7 @@
 
       if (allValid) {
         collectFormData();
-        submitToFormidable();
+        submitToGravityForms();
       }
     });
 
@@ -502,13 +475,13 @@
     // Initial setup
     updateProgress();
 
-    // Submit to Formidable via AJAX
-    const submitToFormidable = async () => {
+    // Submit to Gravity Forms via AJAX
+    const submitToGravityForms = async () => {
       const ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
-      const nonce = '<?php echo wp_create_nonce('submit_to_formidable_nonce'); ?>';
+      const nonce = '<?php echo wp_create_nonce('submit_protection_gf_nonce'); ?>';
       const jsonString = JSON.stringify(formData);
       const payload = new URLSearchParams({
-        action: 'submit_protection_to_formidable',
+        action: 'submit_protection_to_gravity_forms',
         nonce: nonce,
         formData: jsonString,
       });
@@ -524,7 +497,6 @@
 
         if (response.ok) {
           const result = await response.json();
-          // Push to GTM dataLayer
           window.dataLayer = window.dataLayer || [];
           window.dataLayer.push({
             'event': 'generate_lead',

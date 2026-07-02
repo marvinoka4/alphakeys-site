@@ -55,142 +55,101 @@ function helium_fdn_force_page_template($template)
 }
 add_filter('template_include', 'helium_fdn_force_page_template', 99);
 
+// Gravity Forms — mortgages form
+// GF form ID: find it at Gravity Forms → Forms, hover the form name and check the URL (?id=X)
+add_action('wp_ajax_submit_mortgage_to_gravity_forms', 'handle_mortgage_gf_submission');
+add_action('wp_ajax_nopriv_submit_mortgage_to_gravity_forms', 'handle_mortgage_gf_submission');
 
-// custom formidable morgages form
-add_action('wp_ajax_submit_to_formidable', 'handle_formidable_submission');
-add_action('wp_ajax_nopriv_submit_to_formidable', 'handle_formidable_submission');
-
-function handle_formidable_submission()
+function handle_mortgage_gf_submission()
 {
-    check_ajax_referer('submit_to_formidable_nonce', 'nonce');
+    check_ajax_referer('submit_mortgage_gf_nonce', 'nonce');
 
     $rawFormData = isset($_POST['formData']) ? $_POST['formData'] : '';
-    error_log('Raw POST formData: ' . $rawFormData);
+    $formData = json_decode(stripslashes(urldecode($rawFormData)), true);
 
-    $decodedRawFormData = urldecode($rawFormData);
-    error_log('URL-decoded formData: ' . $decodedRawFormData);
-
-    $cleanedFormData = stripslashes($decodedRawFormData);
-    error_log('Cleaned formData (after stripslashes): ' . $cleanedFormData);
-
-    $formData = json_decode($cleanedFormData, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        error_log('JSON decode error: ' . json_last_error_msg());
-        error_log('JSON last error code: ' . json_last_error());
-    } else {
-        error_log('JSON decoded successfully');
+    if (json_last_error() !== JSON_ERROR_NONE || !is_array($formData)) {
+        wp_send_json_error('Invalid form data');
     }
-    error_log('Decoded formData: ' . print_r($formData, true));
 
-    $form_id = 2;
+    // Replace with your Gravity Forms Mortgages form ID
+    $gf_form_id = 1;
 
-    $entry_data = array(
-        'form_id' => $form_id,
-        'item_meta' => array(
-            7 => isset($formData['mortgageType']) ? ucwords(str_replace('-', ' ', $formData['mortgageType'])) : '',
-            8 => isset($formData['reason']) ? ucwords(str_replace('-', ' ', $formData['reason'])) : '',
-            10 => isset($formData['propertyPrice']) ? '£' . number_format((int) $formData['propertyPrice'], 0, '.', ',') : '£0',
-            11 => isset($formData['loanAmount']) ? '£' . number_format((int) $formData['loanAmount'], 0, '.', ',') : '£0',
-            31 => isset($formData['currentMortgageOutstanding']) ? '£' . number_format((int) $formData['currentMortgageOutstanding'], 0, '.', ',') : '£0',
-            32 => isset($formData['additionalLoanAmount']) ? '£' . number_format((int) $formData['additionalLoanAmount'], 0, '.', ',') : '£0',
-            12 => isset($formData['mortgageTerm']) ? (int) $formData['mortgageTerm'] . ' years' : '0 years',
-            39 => isset($formData['additionalInfo']) ? (string) $formData['additionalInfo'] : '', // Fixed field ID from logs
-            13 => isset($formData['firstName']) ? (string) $formData['firstName'] : '',
-            14 => isset($formData['lastName']) ? (string) $formData['lastName'] : '',
-            15 => isset($formData['email']) ? (string) $formData['email'] : '',
-            16 => isset($formData['employmentStatus']) ? ucwords(str_replace('-', ' ', $formData['employmentStatus'])) : '',
-            17 => isset($formData['grossAnnualIncome']) ? '£' . number_format((int) $formData['grossAnnualIncome'], 0, '.', ',') : '£0'
-        )
+    $input_values = array(
+        'input_1'  => isset($formData['mortgageType']) ? ucwords(str_replace('-', ' ', $formData['mortgageType'])) : '',
+        'input_3'  => isset($formData['reason']) ? ucwords(str_replace('-', ' ', $formData['reason'])) : '',
+        'input_4'  => isset($formData['propertyPrice']) ? (int) $formData['propertyPrice'] : 0,
+        'input_5'  => isset($formData['loanAmount']) ? (int) $formData['loanAmount'] : 0,
+        'input_6'  => isset($formData['currentMortgageOutstanding']) ? (int) $formData['currentMortgageOutstanding'] : 0,
+        'input_7'  => isset($formData['additionalLoanAmount']) ? (int) $formData['additionalLoanAmount'] : 0,
+        'input_8'  => isset($formData['mortgageTerm']) ? (int) $formData['mortgageTerm'] : 0,
+        'input_9'  => isset($formData['additionalInfo']) ? sanitize_textarea_field($formData['additionalInfo']) : '',
+        'input_10' => isset($formData['firstName']) ? sanitize_text_field($formData['firstName']) : '',
+        'input_11' => isset($formData['lastName']) ? sanitize_text_field($formData['lastName']) : '',
+        'input_12' => isset($formData['email']) ? sanitize_email($formData['email']) : '',
+        'input_13' => isset($formData['employmentStatus']) ? ucwords(str_replace('-', ' ', $formData['employmentStatus'])) : '',
+        'input_14' => isset($formData['grossAnnualIncome']) ? (int) $formData['grossAnnualIncome'] : 0,
+        'input_15' => isset($formData['phone']) ? sanitize_text_field($formData['phone']) : '',
     );
 
-    error_log('Entry data to be submitted: ' . print_r($entry_data, true));
-
-    if (class_exists('FrmEntry')) {
-        $entry_id = FrmEntry::create($entry_data);
-        if ($entry_id) {
-            error_log('Entry created with ID: ' . $entry_id);
-            wp_send_json_success(array('entry_id' => $entry_id));
-        } else {
-            error_log('Failed to create entry');
-            wp_send_json_error('Failed to create entry');
-        }
-    } else {
-        error_log('Formidable Forms not active');
-        wp_send_json_error('Formidable Forms not active');
+    if (!class_exists('GFAPI')) {
+        wp_send_json_error('Gravity Forms not active');
     }
 
+    $result = GFAPI::submit_form($gf_form_id, $input_values);
+
+    if (is_wp_error($result)) {
+        wp_send_json_error($result->get_error_message());
+    }
+
+    wp_send_json_success(array('entry_id' => $result['entry_id']));
     wp_die();
 }
 
 
-// custom formidable protection form
-add_action('wp_ajax_submit_protection_to_formidable', 'handle_protection_formidable_submission');
-add_action('wp_ajax_nopriv_submit_protection_to_formidable', 'handle_protection_formidable_submission');
+// Gravity Forms — protection form
+// GF form ID: find it at Gravity Forms → Forms, hover the form name and check the URL (?id=X)
+add_action('wp_ajax_submit_protection_to_gravity_forms', 'handle_protection_gf_submission');
+add_action('wp_ajax_nopriv_submit_protection_to_gravity_forms', 'handle_protection_gf_submission');
 
-function handle_protection_formidable_submission()
+function handle_protection_gf_submission()
 {
-    // Verify nonce
-    check_ajax_referer('submit_to_formidable_nonce', 'nonce');
+    check_ajax_referer('submit_protection_gf_nonce', 'nonce');
 
-    // Get raw POST data
     $rawFormData = isset($_POST['formData']) ? $_POST['formData'] : '';
-    error_log('Raw POST formData: ' . $rawFormData);
+    $formData = json_decode(stripslashes(urldecode($rawFormData)), true);
 
-    // Decode URL-encoded string
-    $decodedRawFormData = urldecode($rawFormData);
-    error_log('URL-decoded formData: ' . $decodedRawFormData);
-
-    // Remove backslashes (if double-escaped)
-    $cleanedFormData = stripslashes($decodedRawFormData);
-    error_log('Cleaned formData (after stripslashes): ' . $cleanedFormData);
-
-    // Decode the JSON string
-    $formData = json_decode($cleanedFormData, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        error_log('JSON decode error: ' . json_last_error_msg());
+    if (json_last_error() !== JSON_ERROR_NONE || !is_array($formData)) {
         wp_send_json_error('Invalid form data');
     }
-    error_log('Decoded formData: ' . print_r($formData, true));
 
-    // Define the Formidable Form ID
-    $form_id = 3;
+    // Replace with your Gravity Forms Protection form ID
+    $gf_form_id = 2;
 
-    // Map formData to Formidable field IDs
-    $entry_data = array(
-        'form_id' => $form_id,
-        'item_meta' => array(
-            19 => isset($formData['protectionOption']) ? ucwords(str_replace('-', ' ', $formData['protectionOption'])) : '',
-            20 => isset($formData['coverAmount']) ? '£' . number_format((int) $formData['coverAmount'], 0, '.', ',') : '£0',
-            21 => isset($formData['coverTerm']) ? (int) $formData['coverTerm'] . ' years' : '0 years',
-            22 => isset($formData['firstName']) ? (string) $formData['firstName'] : '',
-            23 => isset($formData['lastName']) ? (string) $formData['lastName'] : '',
-            24 => isset($formData['phone']) ? '+' . ltrim((string) $formData['phone'], '+') : '',
-            25 => isset($formData['email']) ? (string) $formData['email'] : '',
-            26 => isset($formData['dob']) ? (string) $formData['dob'] : '',
-            27 => isset($formData['smokerStatus']) ? ucwords(str_replace('-', ' ', $formData['smokerStatus'])) : '',
-            28 => isset($formData['employmentStatus']) ? ucwords(str_replace('-', ' ', $formData['employmentStatus'])) : '',
-            29 => isset($formData['grossAnnualIncome']) ? '£' . number_format((int) $formData['grossAnnualIncome'], 0, '.', ',') : '£0',
-            30 => isset($formData['additionalInfo']) ? (string) $formData['additionalInfo'] : ''
-        )
+    $input_values = array(
+        'input_1'  => isset($formData['protectionOption']) ? ucwords(str_replace('-', ' ', $formData['protectionOption'])) : '',
+        'input_3'  => isset($formData['coverAmount']) ? (int) $formData['coverAmount'] : 0,
+        'input_4'  => isset($formData['coverTerm']) ? (int) $formData['coverTerm'] : 0,
+        'input_5'  => isset($formData['firstName']) ? sanitize_text_field($formData['firstName']) : '',
+        'input_6'  => isset($formData['lastName']) ? sanitize_text_field($formData['lastName']) : '',
+        'input_7'  => isset($formData['phone']) ? sanitize_text_field($formData['phone']) : '',
+        'input_8'  => isset($formData['email']) ? sanitize_email($formData['email']) : '',
+        'input_9'  => isset($formData['dob']) ? sanitize_text_field($formData['dob']) : '',
+        'input_10' => isset($formData['smokerStatus']) ? ucwords(str_replace('-', ' ', $formData['smokerStatus'])) : '',
+        'input_11' => isset($formData['employmentStatus']) ? ucwords(str_replace('-', ' ', $formData['employmentStatus'])) : '',
+        'input_12' => isset($formData['grossAnnualIncome']) ? (int) $formData['grossAnnualIncome'] : 0,
+        'input_13' => isset($formData['additionalInfo']) ? sanitize_textarea_field($formData['additionalInfo']) : '',
     );
 
-    // Log the entry data before submission
-    error_log('Entry data to be submitted: ' . print_r($entry_data, true));
-
-    // Create the entry using Formidable's API
-    if (class_exists('FrmEntry')) {
-        $entry_id = FrmEntry::create($entry_data);
-        if ($entry_id) {
-            error_log('Entry created with ID: ' . $entry_id);
-            wp_send_json_success(array('entry_id' => $entry_id));
-        } else {
-            error_log('Failed to create entry');
-            wp_send_json_error('Failed to create entry');
-        }
-    } else {
-        error_log('Formidable Forms not active');
-        wp_send_json_error('Formidable Forms not active');
+    if (!class_exists('GFAPI')) {
+        wp_send_json_error('Gravity Forms not active');
     }
 
+    $result = GFAPI::submit_form($gf_form_id, $input_values);
+
+    if (is_wp_error($result)) {
+        wp_send_json_error($result->get_error_message());
+    }
+
+    wp_send_json_success(array('entry_id' => $result['entry_id']));
     wp_die();
 }
