@@ -11,7 +11,7 @@
     <div class="large-10 cell">
       <div id="page" class="site">
         <div class="container">
-          <div class="form-box" id="gf-protections-box">
+          <div class="form-box" id="form-box">
             <div class="grid-x align-center-middle">
               <div class="cell medium-5 small-12 form-progress">
                 <div class="progress-form margin-vertical-1">
@@ -287,7 +287,7 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const root = document.querySelector('#gf-protections-box');
+    const root = document.querySelector('#form-box');
     const nextButton = root.querySelector('.btn-next');
     const prevButton = root.querySelector('.btn-prev');
     const submitButton = root.querySelector('#submitButton');
