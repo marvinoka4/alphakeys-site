@@ -11,7 +11,7 @@
     <div class="large-10 cell">
       <div id="page" class="site">
         <div class="container">
-          <div class="form-box" id="gf-protections-box">
+          <div class="form-box" id="form-box">
             <div class="grid-x align-center-middle">
               <div class="cell medium-5 small-12 form-progress">
                 <div class="progress-form margin-vertical-1">
@@ -157,6 +157,20 @@
                       <input type="email" id="email" name="email" placeholder="e.g. johndoe@gmail.com" autocomplete="email" required>
                       <span class="form-error">Please enter a valid email address.</span>
                     </div>
+                    <div>
+                      <label for="postCode">Post Code</label>
+                      <input type="text" id="postCode" name="postCode" placeholder="e.g. SW1A 1AA" required pattern="^[A-Za-z]{1,2}[0-9][0-9A-Za-z]?\s?[0-9][A-Za-z]{2}$">
+                      <span class="form-error">Please enter a valid UK post code.</span>
+                    </div>
+                    <div>
+                      <label for="city">City</label>
+                      <input type="text" id="city" name="city" placeholder="e.g. London" required>
+                      <span class="form-error">City is required.</span>
+                    </div>
+                    <div>
+                      <label for="country">Country</label>
+                      <input type="text" id="country" name="country" value="United Kingdom" readonly>
+                    </div>
                     <div class="birth">
                       <label for="dobDay">Date of Birth</label>
                       <div class="grouping">
@@ -242,6 +256,18 @@
                           <td id="summaryEmail">Not provided</td>
                         </tr>
                         <tr>
+                          <td>Post Code</td>
+                          <td id="summaryPostCode">-</td>
+                        </tr>
+                        <tr>
+                          <td>City</td>
+                          <td id="summaryCity">-</td>
+                        </tr>
+                        <tr>
+                          <td>Country</td>
+                          <td id="summaryCountry">United Kingdom</td>
+                        </tr>
+                        <tr>
                           <td>Date of Birth</td>
                           <td id="summaryDob">Not provided</td>
                         </tr>
@@ -287,7 +313,7 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const root = document.querySelector('#gf-protections-box');
+    const root = document.querySelector('#form-box');
     const nextButton = root.querySelector('.btn-next');
     const prevButton = root.querySelector('.btn-prev');
     const submitButton = root.querySelector('#submitButton');
@@ -351,6 +377,9 @@
         lastName: form.querySelector('#lastName').value || '',
         phone: form.querySelector('#phone').value || '',
         email: form.querySelector('#email').value || '',
+        postCode: form.querySelector('#postCode').value || '',
+        city: form.querySelector('#city').value || '',
+        country: form.querySelector('#country').value || 'United Kingdom',
         dob: `${form.querySelector('#dobDay').value || ''}/${form.querySelector('#dobMonth').value || ''}/${form.querySelector('#dobYear').value || ''}`,
         smokerStatus: form.querySelector('#smokerStatus').value || '',
         employmentStatus: form.querySelector('#employmentStatus').value || '',
@@ -368,6 +397,9 @@
         form.querySelector('#summaryApplicantName').textContent = `${formData.firstName} ${formData.lastName}`.trim() || 'Not provided';
         form.querySelector('#summaryPhone').textContent = formData.phone || 'Not provided';
         form.querySelector('#summaryEmail').textContent = formData.email || 'Not provided';
+        form.querySelector('#summaryPostCode').textContent = formData.postCode || '-';
+        form.querySelector('#summaryCity').textContent = formData.city || '-';
+        form.querySelector('#summaryCountry').textContent = formData.country || 'United Kingdom';
         form.querySelector('#summaryDob').textContent = formData.dob === '//' ? 'Not provided' : formData.dob;
         form.querySelector('#summarySmokerStatus').textContent = formData.smokerStatus ? formData.smokerStatus.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Not selected';
         form.querySelector('#summaryEmploymentStatus').textContent = formData.employmentStatus ? formData.employmentStatus.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Not selected';

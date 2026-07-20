@@ -89,6 +89,9 @@ function handle_mortgage_gf_submission()
         'input_13' => isset($formData['employmentStatus']) ? ucwords(str_replace('-', ' ', $formData['employmentStatus'])) : '',
         'input_14' => isset($formData['grossAnnualIncome']) ? (int) $formData['grossAnnualIncome'] : 0,
         'input_15' => isset($formData['phone']) ? sanitize_text_field($formData['phone']) : '',
+        'input_16' => isset($formData['postCode']) ? sanitize_text_field($formData['postCode']) : '',
+        'input_17' => isset($formData['city']) ? sanitize_text_field($formData['city']) : '',
+        'input_18' => isset($formData['country']) ? sanitize_text_field($formData['country']) : 'United Kingdom',
     );
 
     if (!class_exists('GFAPI')) {
@@ -138,6 +141,9 @@ function handle_protection_gf_submission()
         'input_11' => isset($formData['employmentStatus']) ? ucwords(str_replace('-', ' ', $formData['employmentStatus'])) : '',
         'input_12' => isset($formData['grossAnnualIncome']) ? (int) $formData['grossAnnualIncome'] : 0,
         'input_13' => isset($formData['additionalInfo']) ? sanitize_textarea_field($formData['additionalInfo']) : '',
+        'input_14' => isset($formData['postCode']) ? sanitize_text_field($formData['postCode']) : '',
+        'input_15' => isset($formData['city']) ? sanitize_text_field($formData['city']) : '',
+        'input_16' => isset($formData['country']) ? sanitize_text_field($formData['country']) : 'United Kingdom',
     );
 
     if (!class_exists('GFAPI')) {
